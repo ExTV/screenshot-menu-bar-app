@@ -1,0 +1,33 @@
+# This workflow will build a Swift project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+
+name: Swift
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: macos-14
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_15.2.app || sudo xcode-select -s /Applications/Xcode.app
+
+    - name: Build app
+      run: xcodebuild -project ScreenShot.xcodeproj -scheme ScreenShot -destination 'platform=macOS' build
+
+    - name: Run tests
+      run: xcodebuild test -project ScreenShot.xcodeproj -scheme ScreenShot -destination 'platform=macOS'
+
+    - name: Show build logs on failure
+      if: failure()
+      run: |
+        echo "Build or test failed. Showing derived data logs:"
+        find ~/Library/Developer/Xcode/DerivedData -name "*.log" | xargs cat || true
