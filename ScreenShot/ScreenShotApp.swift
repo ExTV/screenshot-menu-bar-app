@@ -1,5 +1,6 @@
 import SwiftUI
 import ServiceManagement
+
 @main
 /// ScreenShotApp is the main entry point for the menu bar screenshot app.
 struct ScreenShotApp: App {

@@ -1,10 +1,14 @@
 import SwiftUI
 
-/// ContentView displays a simple status message for the ScreenShot menu bar app.
-struct ContentView: View {
+/// About window displaying app information.
+struct AboutView: View {
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "camera")
+        VStack(spacing: 16) {
+            Image(systemName: "camera.fill")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 64, height: 64)
@@ -14,14 +18,25 @@ struct ContentView: View {
                 .font(.title)
                 .bold()
 
-            Text("Menu bar app is running.")
+            Text("Version \(appVersion)")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
+
+            Text("A lightweight menu bar screenshot utility for macOS.")
+                .font(.body)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+
+            Divider()
+
+            Text("\u{00A9} 2025 ExTV. MIT License.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
-        .padding(40)
+        .padding(30)
     }
 }
 
 #Preview {
-    ContentView()
+    AboutView()
 }

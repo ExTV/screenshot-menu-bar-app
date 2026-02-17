@@ -1,167 +1,263 @@
 import Cocoa
+import SwiftUI
 
 /// AppDelegate manages the menu bar app lifecycle and screenshot functionality.
-class AppDelegate: NSObject, NSApplicationDelegate {
-    /// The status item displayed in the menu bar.
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var statusItem: NSStatusItem!
-    
-    /// Returns true if the app is running for the first time.
-    var isFirstRun: Bool {
-        !UserDefaults.standard.bool(forKey: "HasLaunchedBefore")
-    }
-    
-    /// Controls whether the app runs in background (hidden from Dock).
-    var runInBackground: Bool {
-        get { UserDefaults.standard.bool(forKey: "RunInBackground") }
-        set { UserDefaults.standard.set(newValue, forKey: "RunInBackground") }
-    }
+    private let manager = ScreenshotManager.shared
+    private var recentMenu: NSMenu!
+    private var aboutWindow: NSWindow?
+    private var preferencesWindow: NSWindow?
 
-    /// Called when the app finishes launching. Sets up menu and status item.
+    // MARK: - App Lifecycle
+
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if isFirstRun {
+        if manager.isFirstRun {
             showSetupDialog()
-            UserDefaults.standard.set(true, forKey: "HasLaunchedBefore")
+            manager.markLaunched()
         } else {
             setActivationPolicy()
         }
 
+        manager.requestNotificationPermission()
+        setupMenuBar()
+    }
+
+    func setActivationPolicy() {
+        NSApp.setActivationPolicy(manager.runInBackground ? .accessory : .regular)
+    }
+
+    // MARK: - Menu Bar Setup
+
+    private func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        statusItem.button?.image = NSImage(systemSymbolName: "camera", accessibilityDescription: nil)
+        statusItem.button?.image = NSImage(
+            systemSymbolName: "camera",
+            accessibilityDescription: "ScreenShot"
+        )
 
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Fullscreen", action: #selector(fullscreen), keyEquivalent: "f"))
-        menu.addItem(NSMenuItem(title: "Window", action: #selector(window), keyEquivalent: "w"))
-        menu.addItem(NSMenuItem(title: "Crop", action: #selector(crop), keyEquivalent: "c"))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Open Screenshot Folder", action: #selector(openFolder), keyEquivalent: "o"))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Change Folder…", action: #selector(changeFolder), keyEquivalent: ","))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
+        menu.delegate = self
+
+        // Capture actions
+        menu.addItem(withTitle: "Fullscreen", action: #selector(captureFullscreen), keyEquivalent: "f")
+        menu.addItem(withTitle: "Window", action: #selector(captureWindow), keyEquivalent: "w")
+        menu.addItem(withTitle: "Crop", action: #selector(captureCrop), keyEquivalent: "c")
+        menu.addItem(.separator())
+
+        // Timed capture
+        let timedItem = NSMenuItem(title: "Timed Capture", action: nil, keyEquivalent: "")
+        timedItem.submenu = buildTimedMenu()
+        menu.addItem(timedItem)
+        menu.addItem(.separator())
+
+        // Recent screenshots
+        let recentItem = NSMenuItem(title: "Recent Screenshots", action: nil, keyEquivalent: "")
+        recentMenu = NSMenu()
+        recentItem.submenu = recentMenu
+        menu.addItem(recentItem)
+        menu.addItem(.separator())
+
+        // Folder actions
+        menu.addItem(withTitle: "Open Screenshot Folder", action: #selector(openFolder), keyEquivalent: "o")
+        menu.addItem(withTitle: "Change Folder…", action: #selector(changeFolder), keyEquivalent: ",")
+        menu.addItem(.separator())
+
+        // Preferences & About
+        menu.addItem(withTitle: "Preferences…", action: #selector(openPreferences), keyEquivalent: "p")
+        menu.addItem(withTitle: "About ScreenShot", action: #selector(showAbout), keyEquivalent: "")
+        menu.addItem(.separator())
+
+        // Quit
+        menu.addItem(withTitle: "Quit", action: #selector(quitApp), keyEquivalent: "q")
+
         statusItem.menu = menu
     }
-    
-    /// Sets the app's activation policy based on user preference.
-    func setActivationPolicy() {
-        NSApp.setActivationPolicy(runInBackground ? .accessory : .regular)
-    }
 
-    /// Capture fullscreen screenshot.
-    @objc func fullscreen() { runCaptureCommand(args: []) }
-    /// Capture window screenshot.
-    @objc func window() { runCaptureCommand(args: ["-w"]) }
-    /// Capture cropped screenshot.
-    @objc func crop() { runCaptureCommand(args: ["-s"]) }
-
-    /// Runs the screencapture command with given arguments and copies result to clipboard.
-    func runCaptureCommand(args: [String]) {
-        guard let folderURL = getScreenshotFolderURL() else { return }
-
-        if folderURL.startAccessingSecurityScopedResource() {
-            let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .medium)
-                .replacingOccurrences(of: "/", with: ".")
-                .replacingOccurrences(of: ",", with: "")
-                .replacingOccurrences(of: " ", with: "-")
-                .replacingOccurrences(of: ":", with: ".")
-
-            let path = folderURL.appendingPathComponent("screenshot-\(timestamp).png")
-
-            let process = Process()
-            process.launchPath = "/usr/sbin/screencapture"
-            process.arguments = args + [path.path]
-
-            process.terminationHandler = { _ in
-                if let image = NSImage(contentsOf: path) {
-                    let pb = NSPasteboard.general
-                    pb.clearContents()
-                    pb.writeObjects([image])
-                }
-                folderURL.stopAccessingSecurityScopedResource()
+    private func buildTimedMenu() -> NSMenu {
+        let menu = NSMenu()
+        for delay in [3, 5, 10] {
+            let delayItem = NSMenuItem(title: "\(delay) Seconds", action: nil, keyEquivalent: "")
+            let sub = NSMenu()
+            for (title, mode) in [("Fullscreen", CaptureMode.fullscreen),
+                                   ("Window", CaptureMode.window),
+                                   ("Crop", CaptureMode.crop)] {
+                let item = NSMenuItem(title: title, action: #selector(timedCapture(_:)), keyEquivalent: "")
+                item.representedObject = ["delay": delay, "mode": mode.rawValue] as [String: Int]
+                sub.addItem(item)
             }
+            delayItem.submenu = sub
+            menu.addItem(delayItem)
+        }
+        return menu
+    }
 
-            process.launch()
+    // MARK: - NSMenuDelegate
+
+    func menuWillOpen(_ menu: NSMenu) {
+        updateRecentMenu()
+    }
+
+    private func updateRecentMenu() {
+        recentMenu.removeAllItems()
+        let recents = manager.recentScreenshots
+
+        if recents.isEmpty {
+            let empty = NSMenuItem(title: "No Recent Screenshots", action: nil, keyEquivalent: "")
+            empty.isEnabled = false
+            recentMenu.addItem(empty)
+        } else {
+            for url in recents {
+                let item = NSMenuItem(
+                    title: url.lastPathComponent,
+                    action: #selector(openRecent(_:)),
+                    keyEquivalent: ""
+                )
+                item.representedObject = url
+                item.image = NSWorkspace.shared.icon(forFile: url.path)
+                item.image?.size = NSSize(width: 16, height: 16)
+                recentMenu.addItem(item)
+            }
+            recentMenu.addItem(.separator())
+            recentMenu.addItem(
+                withTitle: "Clear Recents",
+                action: #selector(clearRecents),
+                keyEquivalent: ""
+            )
         }
     }
 
-    /// Opens the screenshot folder in Finder.
+    // MARK: - Capture Actions
+
+    @objc func captureFullscreen() { manager.capture(mode: .fullscreen) }
+    @objc func captureWindow() { manager.capture(mode: .window) }
+    @objc func captureCrop() { manager.capture(mode: .crop) }
+
+    @objc func timedCapture(_ sender: NSMenuItem) {
+        guard let info = sender.representedObject as? [String: Int],
+              let delay = info["delay"],
+              let raw = info["mode"],
+              let mode = CaptureMode(rawValue: raw) else { return }
+        manager.capture(mode: mode, delay: delay)
+    }
+
+    // MARK: - Recent Screenshots
+
+    @objc func openRecent(_ sender: NSMenuItem) {
+        guard let url = sender.representedObject as? URL else { return }
+        NSWorkspace.shared.open(url)
+    }
+
+    @objc func clearRecents() {
+        manager.recentScreenshots = []
+    }
+
+    // MARK: - Folder Actions
+
     @objc func openFolder() {
-        guard let folderURL = getScreenshotFolderURL() else { return }
-        if folderURL.startAccessingSecurityScopedResource() {
-            NSWorkspace.shared.open(folderURL)
-            folderURL.stopAccessingSecurityScopedResource()
+        guard let url = manager.getScreenshotFolderURL() else { return }
+        if url.startAccessingSecurityScopedResource() {
+            NSWorkspace.shared.open(url)
+            url.stopAccessingSecurityScopedResource()
         }
     }
 
-    /// Prompts user to select a new screenshot folder.
     @objc func changeFolder() {
         let panel = NSOpenPanel()
-        panel.title = "Select New Screenshot Folder"
+        panel.title = "Select Screenshot Folder"
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
-
         if panel.runModal() == .OK, let url = panel.url {
-            saveScreenshotFolderBookmark(url: url)
+            manager.saveScreenshotFolderBookmark(url: url)
         }
     }
 
-    /// Saves a security-scoped bookmark for the screenshot folder.
-    func saveScreenshotFolderBookmark(url: URL) {
-        do {
-            let bookmark = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-            UserDefaults.standard.set(bookmark, forKey: "ScreenshotFolderBookmark")
-        } catch {
-            print("Bookmark save failed: \(error)")
+    // MARK: - Preferences & About
+
+    @objc func openPreferences() {
+        if preferencesWindow == nil {
+            let hosting = NSHostingView(rootView: PreferencesView())
+            hosting.sizingOptions = .intrinsicContentSize
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 450, height: 300),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "Preferences"
+            window.contentView = hosting
+            window.center()
+            window.isReleasedWhenClosed = false
+            preferencesWindow = window
         }
+        preferencesWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
-    /// Retrieves the screenshot folder URL from stored bookmark.
-    func getScreenshotFolderURL() -> URL? {
-        if let data = UserDefaults.standard.data(forKey: "ScreenshotFolderBookmark") {
-            var isStale = false
-            do {
-                let url = try URL(resolvingBookmarkData: data, options: [.withSecurityScope], relativeTo: nil, bookmarkDataIsStale: &isStale)
-                if isStale { saveScreenshotFolderBookmark(url: url) }
-                return url
-            } catch {
-                print("Failed to resolve bookmark: \(error)")
-            }
-        } else {
-            return nil
+    @objc func showAbout() {
+        if aboutWindow == nil {
+            let hosting = NSHostingView(rootView: AboutView())
+            hosting.sizingOptions = .intrinsicContentSize
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 300, height: 300),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "About ScreenShot"
+            window.contentView = hosting
+            window.center()
+            window.isReleasedWhenClosed = false
+            aboutWindow = window
         }
-        return nil
+        aboutWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
-    /// Shows the initial setup dialog for first run.
-    func showSetupDialog() {
+    // MARK: - First Run Setup
+
+    private func showSetupDialog() {
         let alert = NSAlert()
-        alert.messageText = "Welcome to Screenshot Tool Setup"
-        alert.informativeText = "You can choose to run the app in background (hidden from Dock). You will also need to select a download folder."
+        alert.messageText = "Welcome to ScreenShot"
+        alert.informativeText = "Choose whether to run in the background, then pick a folder for your screenshots."
         alert.alertStyle = .informational
         alert.addButton(withTitle: "Continue")
+        alert.addButton(withTitle: "Quit")
 
         let checkbox = NSButton(checkboxWithTitle: "Run in background (hide from Dock)", target: nil, action: nil)
         checkbox.state = .on
         alert.accessoryView = checkbox
 
-        alert.runModal()
+        if alert.runModal() != .alertFirstButtonReturn {
+            NSApp.terminate(nil)
+            return
+        }
 
-        runInBackground = (checkbox.state == .on)
+        manager.runInBackground = (checkbox.state == .on)
         setActivationPolicy()
 
-        // Prompt for screenshot folder
         let panel = NSOpenPanel()
         panel.title = "Choose Screenshot Folder"
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
+
         if panel.runModal() == .OK, let url = panel.url {
-            saveScreenshotFolderBookmark(url: url)
+            manager.saveScreenshotFolderBookmark(url: url)
+        } else {
+            let warn = NSAlert()
+            warn.messageText = "No Folder Selected"
+            warn.informativeText = "You can set a screenshot folder anytime from the menu bar using \"Change Folder…\"."
+            warn.alertStyle = .informational
+            warn.addButton(withTitle: "OK")
+            warn.runModal()
         }
     }
 
-    /// Quits the application.
+    // MARK: - Quit
+
     @objc func quitApp() {
-        NSApplication.shared.terminate(nil)
+        NSApp.terminate(nil)
     }
 }
