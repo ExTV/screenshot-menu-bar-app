@@ -1,5 +1,7 @@
 # Pixlet — Screen Capture for macOS 26
 
+[![Latest Release](https://img.shields.io/github/v/release/ExTV/screenshot-menu-bar-app?label=Download&color=blue)](https://github.com/ExTV/screenshot-menu-bar-app/releases/latest)
+
 **Pixlet** is a sleek, modern macOS **menu bar app** built for **macOS 26 (Tahoe)** with full **Liquid Glass** design. Capture your screen instantly without interrupting your workflow.
 
 ---
@@ -34,7 +36,7 @@
 
 ## Installation
 
-1. Download `Pixlet.dmg` *(coming soon)*
+1. Download **[Pixlet.dmg](https://github.com/ExTV/screenshot-menu-bar-app/releases/latest)** from the latest release
 2. Open it and drag **Pixlet.app** into Applications
 3. Launch from Launchpad or Spotlight
 4. On first launch, grant **Screen Recording** permission and choose a save folder
