@@ -136,7 +136,11 @@ struct MenuBarView: View {
 
             ForEach(engine.recentCaptures.prefix(5), id: \.self) { url in
                 Button {
-                    NSWorkspace.shared.open(url)
+                    if let folder = engine.folderURL(),
+                       folder.startAccessingSecurityScopedResource() {
+                        NSWorkspace.shared.open(url)
+                        folder.stopAccessingSecurityScopedResource()
+                    }
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "doc.fill")

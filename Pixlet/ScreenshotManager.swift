@@ -1,5 +1,6 @@
 import Cocoa
 import CoreGraphics
+import ImageIO
 import UserNotifications
 import Observation
 
@@ -47,10 +48,21 @@ enum CaptureMode: Int, CaseIterable, Identifiable {
 final class CaptureEngine {
     static let shared = CaptureEngine()
 
-    var recentCaptures: [URL] = []
+    // didSet ensures every mutation (including clear) persists immediately to UserDefaults
+    var recentCaptures: [URL] = [] {
+        didSet {
+            defaults.set(recentCaptures.map(\.path), forKey: "pixlet.recentCaptures")
+        }
+    }
 
     private let defaults = UserDefaults.standard
     private let maxRecent = 8
+    // Reused across captures — DateFormatter is expensive to create
+    private let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd-HH.mm.ss"
+        return f
+    }()
 
     var isFirstRun: Bool { !defaults.bool(forKey: "pixlet.launched") }
 
@@ -59,8 +71,10 @@ final class CaptureEngine {
             "pixlet.showNotifications": true,
             "pixlet.format": "png"
         ])
-        recentCaptures = (defaults.array(forKey: "pixlet.recentCaptures") as? [String])?
-            .compactMap { URL(fileURLWithPath: $0) } ?? []
+        // Filter out files that no longer exist on disk so stale entries never reappear
+        recentCaptures = ((defaults.array(forKey: "pixlet.recentCaptures") as? [String]) ?? [])
+            .compactMap { URL(fileURLWithPath: $0) }
+            .filter { FileManager.default.fileExists(atPath: $0.path) }
     }
 
     // MARK: - Preferences (read at capture time via UserDefaults)
@@ -109,7 +123,11 @@ final class CaptureEngine {
             relativeTo: nil,
             bookmarkDataIsStale: &stale
         ) else { return nil }
-        if stale { saveFolderBookmark(url: url) }
+        if stale {
+            _ = url.startAccessingSecurityScopedResource()
+            saveFolderBookmark(url: url)
+            url.stopAccessingSecurityScopedResource()
+        }
         return url
     }
 
@@ -142,12 +160,10 @@ final class CaptureEngine {
             return
         }
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd-HH.mm.ss"
-        let filename = "capture-\(formatter.string(from: Date())).\(format.rawValue)"
+        let filename = "capture-\(dateFormatter.string(from: Date())).\(format.rawValue)"
         let dest = folder.appendingPathComponent(filename)
 
-        var args = mode.arguments + ["-t", format.rawValue, "-c"]  // -c = also copy to clipboard
+        var args = mode.arguments + ["-t", format.rawValue]
         if delay > 0 { args += ["-T", "\(delay)"] }
         args.append(dest.path)
 
@@ -161,10 +177,10 @@ final class CaptureEngine {
                       p.terminationStatus == 0,
                       FileManager.default.fileExists(atPath: dest.path) else { return }
                 self.copyToClipboard(dest)
+                // didSet on recentCaptures auto-persists to UserDefaults
                 var list = self.recentCaptures
                 list.insert(dest, at: 0)
                 self.recentCaptures = Array(list.prefix(self.maxRecent))
-                self.defaults.set(self.recentCaptures.map(\.path), forKey: "pixlet.recentCaptures")
                 if self.showNotifications { self.postNotification(filename: filename, fileURL: dest) }
                 if self.openAfterCapture { NSWorkspace.shared.open(dest) }
             }
@@ -181,15 +197,14 @@ final class CaptureEngine {
     // MARK: - Helpers
 
     private func copyToClipboard(_ url: URL) {
-        guard let img = NSImage(contentsOf: url),
-              let tiff = img.tiffRepresentation,
-              let rep  = NSBitmapImageRep(data: tiff),
-              let png  = rep.representation(using: .png, properties: [:]) else { return }
+        // Read file data once, convert to TIFF only if needed for universal paste compatibility
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return }
+        let rep = NSBitmapImageRep(cgImage: cgImage)
+        guard let tiff = rep.tiffRepresentation else { return }
         let pb = NSPasteboard.general
         pb.clearContents()
-        // PNG + TIFF data for design tools, NSImage for native apps, file URL for Finder paste
-        pb.declareTypes([.png, .tiff, .fileURL], owner: nil)
-        pb.setData(png,  forType: .png)
+        pb.declareTypes([.tiff, .fileURL], owner: nil)
         pb.setData(tiff, forType: .tiff)
         pb.writeObjects([url as NSURL])
     }
@@ -200,11 +215,11 @@ final class CaptureEngine {
         content.body = filename
         content.sound = .default
         // Attach the screenshot as thumbnail — shows actual capture instead of app icon
+        // No clipping — show the full screenshot as the notification thumbnail
         if let attachment = try? UNNotificationAttachment(
             identifier: UUID().uuidString,
             url: fileURL,
-            options: [UNNotificationAttachmentOptionsThumbnailClippingRectKey:
-                CGRect(x: 0, y: 0, width: 1, height: 1) as AnyObject]
+            options: nil
         ) {
             content.attachments = [attachment]
         }
