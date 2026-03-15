@@ -1,61 +1,61 @@
 {
   "images" : [
     {
-      "filename" : "imageee-2.png",
+      "filename" : "pixlet-16.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
-      "filename" : "imageee-3.png",
+      "filename" : "pixlet-32.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
-      "filename" : "imageee-3 1.png",
+      "filename" : "pixlet-32.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
-      "filename" : "imageee-4.png",
+      "filename" : "pixlet-64.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
-      "filename" : "imageee-5.png",
+      "filename" : "pixlet-128.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
-      "filename" : "imageee-6.png",
+      "filename" : "pixlet-256.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
-      "filename" : "imageee-6 1.png",
+      "filename" : "pixlet-256.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "imageee-7.png",
+      "filename" : "pixlet-512.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
-      "filename" : "imageee-7 1.png",
+      "filename" : "pixlet-512.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "imageee.png",
+      "filename" : "pixlet-1024.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"

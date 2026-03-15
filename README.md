@@ -1,78 +1,86 @@
-## 📸 ScreenShot — App for macOS Tahoe 26
+# Pixlet — Screen Capture for macOS 26
 
-**ScreenShot** is a lightweight macOS **menu bar app** for **Tahoe 26**, letting you take instant screenshots directly from your menu bar .
-
----
-
-## 🚀 Features
-
-- 📸 Fullscreen, window, and cropped screenshot options  
-- 📋 Automatically copies screenshot to clipboard  
-- 📁 Choose your screenshot folder on first launch  
-- 🧼 Simple interface — no unnecessary menus or complexity  
+**Pixlet** is a sleek, modern macOS **menu bar app** built for **macOS 26 (Tahoe)** with full **Liquid Glass** design. Capture your screen instantly without interrupting your workflow.
 
 ---
 
-## ✅ Compatibility
+## Preview
 
-- macOS **Tahoe 26** (Apple Silicon)
-
----
-
-## 📦 Installation
-
-1. Download [`ScreenShot.dmg`](https://github.com/ExTV/screenshot-menu-bar-app/raw/main/ScreenShot.dmg)
-2. Open it and **drag `ScreenShot.app` into the Applications folder**  
-3. Launch the app from Launchpad or Spotlight  
-4. First launch will prompt you to select a screenshot folder  
-5. Done! You’ll now see a camera icon in your menu bar
+<img src="pixlet.png" alt="Pixlet App Preview" width="320"/>
 
 ---
 
+## Features
 
-## ✨ Screenshot
-
-<img src="ScreenShot.png" alt="App Preview" width="300"/>
-
----
-
-## 🛠️ Build from Source
-
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/ExTV/screenshot-menu-bar-app.git
-   ```
-2. Open `ScreenShot.xcodeproj` in Xcode.
-3. Select the `ScreenShot` scheme and your target device.
-4. Build and run.
+- **Liquid Glass UI** — built from the ground up for macOS 26 with native glass effects
+- **Full Screen, Window & Selection** capture modes
+- **Timed captures** — 3s, 5s, 10s delay with mode selection
+- **Auto copies to clipboard** — paste anywhere instantly (PNG + TIFF + file URL)
+- **Recent captures** — quick access to your last 5 captures from the menu
+- **Notifications** — thumbnail preview of your capture shown in the notification
+- **Onboarding flow** — guided permission setup on first launch (Screen Recording, Notifications, Folder)
+- **Preferences** — format (PNG, JPEG, HEIC, TIFF), auto-open, notifications, folder
+- **Launch at login** via `SMAppService`
+- **Sandboxed & Hardened Runtime** — secure by design
 
 ---
 
-## 💡 Usage
+## Compatibility
 
-- Click the camera icon in the menu bar to access screenshot options.
-- Use keyboard shortcuts for quick actions (customizable in System Preferences).
-- Screenshots are saved to your chosen folder and copied to the clipboard.
-
----
-
-## 🛠️ Contributing
-
-Contributions are welcome! To contribute:
-- Fork the repository and create your branch.
-- Make your changes with clear commit messages.
-- Open a pull request describing your changes.
+- macOS **26 (Tahoe)** or later
+- Apple Silicon & Intel
 
 ---
 
-## 🐞 Troubleshooting
+## Installation
 
-- If the app does not appear in the menu bar, ensure you are running macOS Tahoe 26 or later.
-- If you encounter permission issues accessing your chosen screenshot folder, ensure the app has access to that folder in System Preferences.
-- Restart the app after changing permissions.
+1. Download `Pixlet.dmg` *(coming soon)*
+2. Open it and drag **Pixlet.app** into Applications
+3. Launch from Launchpad or Spotlight
+4. On first launch, grant **Screen Recording** permission and choose a save folder
+5. Pixlet appears in your menu bar — ready to capture
 
 ---
 
-## 📄 License
+## Build from Source
+
+```sh
+git clone https://github.com/ExTV/screenshot-menu-bar-app.git
+cd screenshot-menu-bar-app
+open pixlet.xcodeproj
+```
+
+Select the **Pixlet** scheme, build and run (requires Xcode 26+, macOS 26 SDK).
+
+---
+
+## Permissions
+
+| Permission | Purpose |
+|---|---|
+| Screen Recording | Required to capture your screen |
+| Notifications | Optional — shows capture thumbnail after saving |
+| User-Selected Files | Read/write access to your chosen save folder |
+
+---
+
+## Troubleshooting
+
+- **App not capturing** — go to System Settings → Privacy & Security → Screen Recording and enable Pixlet, then relaunch
+- **Folder not accessible** — re-select it via Settings → Capture Folder → Change…
+- **Icon not showing** — make sure you are on macOS 26 or later
+
+---
+
+## Contributing
+
+Pull requests are welcome.
+- Fork the repo and create a feature branch
+- Make changes with clear commit messages
+- Open a PR describing what changed and why
+
+---
+
+## License
 
 MIT — see [LICENSE](LICENSE) for details.
