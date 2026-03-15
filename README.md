@@ -8,7 +8,7 @@
 
 ## Preview
 
-<img src="pixlet.png" alt="Pixlet App Preview" width="320"/>
+<img src="pixlet.png" alt="Pixlet App Preview" width="450"/>
 
 ---
 
