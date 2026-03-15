@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		695534502E08A91300CEE111 /* ScreenShot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScreenShot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		695534502E08A91300CEE111 /* Pixlet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pixlet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		695534522E08A91300CEE111 /* ScreenShot */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ScreenShot;
+			path = Pixlet;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +40,7 @@
 		695534512E08A91300CEE111 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				695534502E08A91300CEE111 /* ScreenShot.app */,
+				695534502E08A91300CEE111 /* Pixlet.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6955344F2E08A91300CEE111 /* ScreenShot */ = {
+		6955344F2E08A91300CEE111 /* pixlet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6955345B2E08A91300CEE111 /* Build configuration list for PBXNativeTarget "ScreenShot" */;
+			buildConfigurationList = 6955345B2E08A91300CEE111 /* Build configuration list for PBXNativeTarget "pixlet" */;
 			buildPhases = (
 				6955344C2E08A91300CEE111 /* Sources */,
 				6955344D2E08A91300CEE111 /* Frameworks */,
@@ -63,11 +63,11 @@
 			fileSystemSynchronizedGroups = (
 				695534522E08A91300CEE111 /* ScreenShot */,
 			);
-			name = ScreenShot;
+			name = pixlet;
 			packageProductDependencies = (
 			);
 			productName = ScreenShot;
-			productReference = 695534502E08A91300CEE111 /* ScreenShot.app */;
+			productReference = 695534502E08A91300CEE111 /* Pixlet.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -78,14 +78,14 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					6955344F2E08A91300CEE111 = {
 						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
-			buildConfigurationList = 6955344B2E08A91300CEE111 /* Build configuration list for PBXProject "ScreenShot" */;
+			buildConfigurationList = 6955344B2E08A91300CEE111 /* Build configuration list for PBXProject "pixlet" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6955344F2E08A91300CEE111 /* ScreenShot */,
+				6955344F2E08A91300CEE111 /* pixlet */,
 			);
 		};
 /* End PBXProject section */
@@ -159,6 +159,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 97SH4VK4YM;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -184,6 +185,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -223,6 +225,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 97SH4VK4YM;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -242,6 +245,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -255,6 +259,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 97SH4VK4YM;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -271,15 +276,18 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Pixlet;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 ExTV";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "Pixlet captures your screen to save screenshots.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.extv.ScreenShot;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.extv.Pixlet;
+				PRODUCT_NAME = Pixlet;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -298,6 +306,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 97SH4VK4YM;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -314,15 +323,18 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Pixlet;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 ExTV";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "Pixlet captures your screen to save screenshots.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.extv.ScreenShot;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.extv.Pixlet;
+				PRODUCT_NAME = Pixlet;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -335,7 +347,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6955344B2E08A91300CEE111 /* Build configuration list for PBXProject "ScreenShot" */ = {
+		6955344B2E08A91300CEE111 /* Build configuration list for PBXProject "pixlet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				695534592E08A91300CEE111 /* Debug */,
@@ -344,7 +356,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6955345B2E08A91300CEE111 /* Build configuration list for PBXNativeTarget "ScreenShot" */ = {
+		6955345B2E08A91300CEE111 /* Build configuration list for PBXNativeTarget "pixlet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6955345C2E08A91300CEE111 /* Debug */,
