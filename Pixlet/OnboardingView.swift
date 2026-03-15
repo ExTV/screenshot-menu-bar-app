@@ -8,12 +8,13 @@ import UserNotifications
 final class OnboardingManager {
     static let shared = OnboardingManager()
     private var window: NSWindow?
+    private var closeObserver: NSObjectProtocol?
 
     func show() {
         guard window == nil else { window?.makeKeyAndOrderFront(nil); return }
         let vc = NSHostingController(rootView: OnboardingView().environment(CaptureEngine.shared))
         let w = NSWindow(contentViewController: vc)
-        w.styleMask = [.titled, .fullSizeContentView]
+        w.styleMask = [.titled, .closable, .fullSizeContentView]
         w.titleVisibility = .hidden
         w.titlebarAppearsTransparent = true
         w.isMovableByWindowBackground = true
@@ -22,11 +23,25 @@ final class OnboardingManager {
         w.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         window = w
+        // Nil the reference when the user closes via the ✕ button
+        // so show() works correctly on subsequent calls
+        closeObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.willCloseNotification,
+            object: w,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                if let self {
+                    NotificationCenter.default.removeObserver(self.closeObserver as Any)
+                    self.closeObserver = nil
+                    self.window = nil
+                }
+            }
+        }
     }
 
     func dismiss() {
-        window?.close()
-        window = nil
+        window?.close() // triggers willCloseNotification → window = nil
     }
 }
 
